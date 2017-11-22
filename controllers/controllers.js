@@ -1,25 +1,29 @@
-var Curso = require("./db/cursos.js");
+var Curso = require("../models/cursos.js");
 
-function curso(request, response) {
-	var idcurso = request.params.id;
-	if (idcurso > 0) {
-		response.send({
-			message: "El curso a mostrar es "+idcurso
-		});
-	} else {
-		response.send({
-			message: "Necesita mandar el id del curso"
-		});
-	}
+//para llamar al cursos por su id
+function cursoI(request, response) {
+	var cursoId = request.params.cursoId;
+
+    Curso.findById(cursoId, (error, curso) => {
+        if (error) {
+            response.status(500).send({ message: 'Error al devolver el curso'});
+        }
+
+        if (!curso) {
+            response.status(404).send({message:'No hay curso'});
+        }
+
+        response.status(200).send({curso});
+    })
 }
 
-function listar(request, response) {
+
+//trae todos los cursos
+function readCurso(request, response) {
 
 	Curso.find({}).sort('-_id').exec((error, cursos) => {
         if (error) {
-            response.status(500).send({
-                message: 'Error al devolver los cursos'
-            });
+            response.status(500).send({message: 'Error al devolver los cursos'});
         }
 
         if (!cursos) {
@@ -31,7 +35,9 @@ function listar(request, response) {
 
 }
 
-function insertar(request, response) {
+//Inserta un nuevo curso
+
+function createCurso(request, response) {
 	var parametros = request.body;
 
     //tenemos que instanciar de cuerpo de la BD
@@ -42,9 +48,7 @@ function insertar(request, response) {
 
 	curso.save((error, cursoGuardado) => {
         if (error) {
-            response.status(500).send({
-                message: 'Error al guardar el marcador'
-            });
+            response.status(500).send({ message: 'Error al guardar el marcador'});
         }
 
         response.send({
@@ -54,7 +58,9 @@ function insertar(request, response) {
     })
 }
 
-function actualizar (request, response) {
+//Actualizar el curso
+
+function updateCurso (request, response) {
     //creamos la variable para luego pasar el id por parametro
     var cursoId = request.params.cursoId
     var update = request.body
@@ -70,7 +76,9 @@ function actualizar (request, response) {
     
 }
 
-function eliminar (request, response) {
+//Eliminar el curso
+
+function deleteCurso (request, response) {
     //creamos la variable para luego pasar el id por parametro
     var cursoId = request.params.cursoId
 
@@ -91,10 +99,12 @@ function eliminar (request, response) {
   })
 }
 
+
+//se exportan las funciones para poder usar en otro archivo
 module.exports = {
-    curso,
-    listar,
-    insertar,
-    actualizar,
-    eliminar
+    cursoI,
+    readCurso,
+    createCurso,
+    updateCurso,
+    deleteCurso
 }
